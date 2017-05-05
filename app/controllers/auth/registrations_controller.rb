@@ -6,6 +6,10 @@ class Auth::RegistrationsController < Devise::RegistrationsController
   before_action :check_enabled_registrations, only: [:new, :create]
   before_action :configure_sign_up_params, only: [:create]
 
+  def create
+    super if sign_up_params[:email].end_with?(ENV["EMAIL_DOMAIN"])
+  end
+
   protected
 
   def build_resource(hash = nil)
@@ -37,4 +41,5 @@ class Auth::RegistrationsController < Devise::RegistrationsController
   def determine_layout
     %w(edit update).include?(action_name) ? 'admin' : 'auth'
   end
+
 end
