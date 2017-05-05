@@ -58,6 +58,11 @@ gem 'twitter-text'
 gem 'tzinfo-data'
 gem 'webpacker', '~>1.2'
 
+# Google OAuth
+gem 'omniauth'
+gem 'omniauth-google-oauth2'
+
+
 group :development, :test do
   gem 'fabrication'
   gem 'fuubar'

@@ -25,6 +25,7 @@
     = f.button :button, t('about.get_started'), type: :submit
 
   .info
+    = link_to 'Login with Google', user_google_omniauth_authorize_path(:google)
     = link_to t('auth.login'), new_user_session_path, class: 'webapp-btn'
     ·
     = link_to t('about.about_this'), about_more_path

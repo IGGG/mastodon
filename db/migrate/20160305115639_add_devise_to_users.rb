@@ -1,6 +1,12 @@
 class AddDeviseToUsers < ActiveRecord::Migration
   def self.up
     change_table(:users) do |t|
+      ## OmniAuth
+      t.string :users, :provider
+      t.string :users, :uid
+      t.string :users, :token
+      t.string :users, :meta
+
       ## Database authenticatable
       t.string :encrypted_password, null: false, default: ""
 

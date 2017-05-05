@@ -36,9 +36,10 @@
 class User < ApplicationRecord
   include Settings::Extend
 
-  devise :registerable, :recoverable,
+  devise :omniauthable, :registerable, :recoverable,
          :rememberable, :trackable, :validatable, :confirmable,
          :two_factor_authenticatable, :two_factor_backupable,
+         omniauth_providers: %i(google),
          otp_secret_encryption_key: ENV['OTP_SECRET'],
          otp_number_of_backup_codes: 10
 
@@ -51,6 +52,43 @@ class User < ApplicationRecord
   scope :recent,    -> { order('id desc') }
   scope :admins,    -> { where(admin: true) }
   scope :confirmed, -> { where.not(confirmed_at: nil) }
+
+  def self.find_for_google(auth)
+    user = User.find_by(email: auth.info.email)
+
+    unless user
+      user = User.create(name:     auth.info.name,
+                         provider: auth.provider,
+                         uid:      auth.uid,
+                         token:    auth.credentials.token,
+                         password: Devise.friendly_token[0, 20],
+                         meta:     auth.to_yaml)
+    end
+    user
+  end
+
+  def self.from_omniauth(auth)
+    user = User.joins(:account).find_by(accounts: {provider: auth["provider"], uid: auth["uid"]})
+    
+
+    unless user
+      if auth["extra"]["id_info"]["hd"] != ENV["GAPPS_DOMAIN"]
+        return nil
+    end
+      
+      user = self.new
+      user.email = auth["extra"]["id_info"]["email"]
+      user.build_account(
+        uid:auth["uid"],
+        provider: auth["provider"]
+      )
+      user.password = Devise.friendly_token[0, 20]
+      
+     # name と username を決めてもらうやつに飛ばす
+    end    
+  end
+
+  
 
   def confirmed?
     confirmed_at.present?
